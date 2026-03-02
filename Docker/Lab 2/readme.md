@@ -10,9 +10,14 @@ The first phase involved modifying a Flask application to ensure environment com
 To resolve build issues, the `requirements.txt` file was updated to use a more stable version of the MarkupSafe library.
 
    - Update: Changed `MarkupSafe==1.0` to `MarkupSafe==1.1.1`.
+     
+- This update was necessary to successfully build the Docker image.
+  
+<img width="500" height="200" alt="editing requirements txt" src="https://github.com/user-attachments/assets/90444e26-8f74-42f1-ba01-5d875767e665" />
+
 
 2. **Dockerfile Configuration**  
-A Dockerfile was created using a lightweight Alpine-based Python image to minimize the image size and ensure a clean environment.
+A Dockerfile was created using a  Alpine-based Python image to minimize the image size and ensure a clean environment.
 
    ```dockerfile
    FROM python:3.6-alpine
@@ -27,24 +32,33 @@ A Dockerfile was created using a lightweight Alpine-based Python image to minimi
 3. **Build and Deployment**  
 The image was built and then executed with specific resource constraints and port bindings.
 
-   - Build Command:
+   -**Build Image:**:
      ```bash
      docker build -t roumaysaa/iti-flask-lab2 .
      ```
 
-   - Run Command:
+   - **Run Container with Memory Limit & Port Mapping:**
+
      ```bash
      docker run -d --name pyflask -p 127.0.0.1:80:5000 -m 100m iti-flask-lab2
      ```
 
-   - Resource Limit: Restricted the container to 100 MB of RAM.
+   - **Resource Limit**: Restricted the container to 100 MB of RAM.
 
-   - Verification: Confirmed settings using:
+   - **Verification: Confirmed settings using:**
      ```bash
      docker inspect pyflask | grep "Memory"
      ```
+<img width="700" height="100" alt="memory limit" src="https://github.com/user-attachments/assets/193999c1-64bd-45ae-88b1-6fb191a025f0" />
 
-4. **Docker Hub Distribution**  
+<img width="300" height="150" alt="port binding of pyflask" src="https://github.com/user-attachments/assets/8326223b-8c58-411e-97ea-3ce72231615e" />
+
+    **Verification: http:127.0.0.1 :**
+    
+<img width="1139" height="977" alt="verify of pyflask" src="https://github.com/user-attachments/assets/1effd6ad-7c73-4a63-8e06-79aa1304ca44" />
+
+
+4. **Push Image to Docker Hub**  
 The final verified image was pushed to a public repository for remote deployment.
 
    - Repository: `docker.io/roumaysaa/iti-flask-lab2`
@@ -52,8 +66,11 @@ The final verified image was pushed to a public repository for remote deployment
      ```bash
      docker push roumaysaa/iti-flask-lab2
      ```
+✅ Image successfully published to Docker Hub: `docker.io/roumaysaa/iti-flask-lab2`
 
-### 🌐 Task 2: Custom Networking & Web Server Orchestration
+<img width="700" height="300" alt="verification of pushing" src="https://github.com/user-attachments/assets/24c01235-df82-4361-999c-c573e7c706ec" />
+
+### 🌐 Task 2: Web Server with Custom Network
 
 This task demonstrated how to isolate containers within a specific subnet and serve custom content via volume mounting.
 
@@ -71,31 +88,25 @@ A dedicated Docker network was established to control the IP address space.
      ```bash
      docker network ls
      ```
+2. **Custom Index Page** (stored in `index.html`):
+   ```html
+      <h1>Lab 2 ITI - Roumaysaa</h1>
+    ```
 
-2. **Nginx Deployment with Volume Mount**  
-An Nginx container was launched to serve a personalized HTML page by mounting a local file into the container’s web root.
+3. **Run Nginx Container with Volume Mount:**  
+An Nginx container was launched to serve a HTML page by mounting a local file into the container’s web root.
 
    - Local Path: `/home/roma/Docker labs/basic-flask-app/index.html`
    - Container Path: `/usr/share/nginx/html/index.html`
    - Command:
      ```bash
-     docker run -d --name webserver-iti --network iti-network -p 8080:80 \
-       -v "/home/roma/Docker labs/basic-flask-app/index.html":/usr/share/nginx/html/index.html \
-       nginx:alpine
+     docker run -d --name webserver-iti --network iti-network -p 8080:80 -v "/home/roma/Docker labs/basic-flask-app/index.html":/usr/share/nginx/html/index.html nginx:alpine
      ```
 
 3. **Verification**  
-Accessing http://localhost:8080 successfully displayed the custom header: "Lab 2 ITI - Roumaysaa".
+Accessing http://localhost:8080 successfully which displays : "Lab 2 ITI - Roumaysaa".
 
-### Results
-
-- Flask app container built and pushed to Docker Hub.
-- Custom Docker network created with subnet `10.0.0.0/8`.
-- Nginx container serving a personalized index page via port 8080.
-
-### Notes
-
-- Dependency update: MarkupSafe was changed from `1.0` → `1.1.1` in `requirements.txt` to resolve build issues.
+<img width="700" height="156" alt="verify web" src="https://github.com/user-attachments/assets/e1e6a642-f9db-4af9-b087-8e6a29afe89a" />
 
 ### Results
 
