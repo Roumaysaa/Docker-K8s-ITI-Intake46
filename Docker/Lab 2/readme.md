@@ -1,78 +1,101 @@
-## Lab 2 – Docker & Flask Web Development
+## Lab #2 – Docker, Flask, & Custom Networking
 
-### Overview
+This repository documents the implementation of Lab #2, focusing on building a custom Python Flask application, managing dependencies within a Dockerfile, and orchestrating containers within a custom-defined Docker network.
 
-This lab demonstrates building and deploying a Python Flask application using Docker, as well as setting up a custom Docker network and running a web server container. The work is divided into two parts:
+### 🛠️ Task 1: Flask Application Development & Dockerization
 
-1. **Part 1:** Build and run a Flask app inside a Docker container, push the image to Docker Hub.
-2. **Part 2:** Create a custom Docker network and run an Nginx container serving a custom index page.
+The first phase involved modifying a Flask application to ensure environment compatibility and deploying it using a custom Docker image.
 
-### Part 1 – Flask Application in Docker
+1. **Dependency Management**  
+To resolve build issues, the `requirements.txt` file was updated to use a more stable version of the MarkupSafe library.
 
-**Steps :**
+   - Update: Changed `MarkupSafe==1.0` to `MarkupSafe==1.1.1`.
 
-- Cloned Repository from `basic-flask-app`.
-- **1-Updated Dependencies**: Edited `requirements.txt` to change:
-  - `MarkupSafe==1.0`
-    + `MarkupSafe==1.1.1`
-  - This update was necessary to successfully build the Docker image.
+2. **Dockerfile Configuration**  
+A Dockerfile was created using a lightweight Alpine-based Python image to minimize the image size and ensure a clean environment.
 
-**2-Dockerfile**:
-```dockerfile
-FROM python:3.6-alpine
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 5000
-CMD ["python", "routes.py"]
-```
+   ```dockerfile
+   FROM python:3.6-alpine
+   WORKDIR /app
+   COPY requirements.txt .
+   RUN pip install -r requirements.txt
+   COPY . .
+   EXPOSE 5000
+   CMD ["python", "routes.py"]
+   ```
 
-**3-Build Image:**
-```
-docker build -t roumaysaa/iti-flask-lab2 .
-```
+3. **Build and Deployment**  
+The image was built and then executed with specific resource constraints and port bindings.
 
-**4-Run Container with Memory Limit & Port Mapping:**
-```
-docker run -d --name pyflask -p 127.0.0.1:80:5000 -m 100m iti-flask-lab2
-```
+   - Build Command:
+     ```bash
+     docker build -t roumaysaa/iti-flask-lab2 .
+     ```
 
-**5-Verify Memory & Port Binding:**
-```
-docker inspect pyflask | grep "Memory"
-```
+   - Run Command:
+     ```bash
+     docker run -d --name pyflask -p 127.0.0.1:80:5000 -m 100m iti-flask-lab2
+     ```
 
-**6-Push Image to Docker Hub:**
-```
-docker push roumaysaa/iti-flask-lab2
-```
+   - Resource Limit: Restricted the container to 100 MB of RAM.
 
-✅ Image successfully published to Docker Hub: `docker.io/roumaysaa/iti-flask-lab2`
+   - Verification: Confirmed settings using:
+     ```bash
+     docker inspect pyflask | grep "Memory"
+     ```
 
-### Part 2 – Web Server with Custom Network
+4. **Docker Hub Distribution**  
+The final verified image was pushed to a public repository for remote deployment.
 
-- **1-Create Custom Network:**
-```
-docker network create --subnet 10.0.0.0/8 iti-network
-```
-- **2-Verify Network:**
-```
-docker network ls
-```
-- **3-Custom Index Page** (stored in `index.html`):
-```html
-<h1>Lab 2 ITI - Roumaysaa</h1>
-```
-- **4-Run Nginx Container with Volume Mount:**
-```
-docker run -d --name webserver-iti --network iti-network -p 8080:80 -v "/home/roma/Docker labs/basic-flask-app/index.html":/usr/share/nginx/html/index.html nginx:alpine
-```
-- **5-Access Web Page**: Open browser at: `http://localhost:8080` which displays:
+   - Repository: `docker.io/roumaysaa/iti-flask-lab2`
+   - Command:
+     ```bash
+     docker push roumaysaa/iti-flask-lab2
+     ```
 
-```
-Lab 2 ITI - Roumaysaa
-```
+### 🌐 Task 2: Custom Networking & Web Server Orchestration
+
+This task demonstrated how to isolate containers within a specific subnet and serve custom content via volume mounting.
+
+1. **Custom Network Creation**  
+A dedicated Docker network was established to control the IP address space.
+
+   - Subnet: `10.0.0.0/8`
+   - Network Name: `iti-network`
+   - Command:
+     ```bash
+     docker network create --subnet 10.0.0.0/8 iti-network
+     ```
+
+   - Verification:
+     ```bash
+     docker network ls
+     ```
+
+2. **Nginx Deployment with Volume Mount**  
+An Nginx container was launched to serve a personalized HTML page by mounting a local file into the container’s web root.
+
+   - Local Path: `/home/roma/Docker labs/basic-flask-app/index.html`
+   - Container Path: `/usr/share/nginx/html/index.html`
+   - Command:
+     ```bash
+     docker run -d --name webserver-iti --network iti-network -p 8080:80 \
+       -v "/home/roma/Docker labs/basic-flask-app/index.html":/usr/share/nginx/html/index.html \
+       nginx:alpine
+     ```
+
+3. **Verification**  
+Accessing http://localhost:8080 successfully displayed the custom header: "Lab 2 ITI - Roumaysaa".
+
+### Results
+
+- Flask app container built and pushed to Docker Hub.
+- Custom Docker network created with subnet `10.0.0.0/8`.
+- Nginx container serving a personalized index page via port 8080.
+
+### Notes
+
+- Dependency update: MarkupSafe was changed from `1.0` → `1.1.1` in `requirements.txt` to resolve build issues.
 
 ### Results
 
