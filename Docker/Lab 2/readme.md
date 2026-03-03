@@ -98,11 +98,15 @@ An Nginx container was launched to serve a HTML page by mounting a local file in
 
    - Local Path: `/home/roma/Docker labs/basic-flask-app/index.html`
    - Container Path: `/usr/share/nginx/html/index.html`
+   - Edit nginx configuration to listen to port 8080 instead of port 80 by creating nginx.conf
+
+   <img width="600" height="200" alt="nginx conf" src="https://github.com/user-attachments/assets/4a6f4a8a-8510-416a-90ca-8ed9f45a68bc" />
+   
    - Command:
      ```bash
-     docker run -d --name webserver-iti --network iti-network -p 8080:80 -v "/home/roma/Docker labs/basic-flask-app/index.html":/usr/share/nginx/html/index.html nginx:alpine
+      docker run -d --name webserver-iti --network iti-network -p 8080:8080 -v "/home/roma/Docker labs/basic-flask-app/index.html":/usr/share/nginx/html/index.html -v "/home/roma/Docker labs/basic-flask-app/nginx.conf":/etc/nginx/nginx.conf  nginx:alpine
      ```
-
+     
 3. **Verification**  
 Accessing http://localhost:8080 successfully which displays : "Lab 2 ITI - Roumaysaa".
 
@@ -112,7 +116,7 @@ Accessing http://localhost:8080 successfully which displays : "Lab 2 ITI - Rouma
 
 - Flask app container built and pushed to Docker Hub.
 - Custom Docker network created with subnet `10.0.0.0/8`.
-- Nginx container serving a personalized index page via port 8080.
+- Nginx container serving a index page via port 8080.
 
 ### Notes
 
